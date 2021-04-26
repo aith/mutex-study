@@ -32,8 +32,7 @@ bool find_threads_at_gte_level(int thread_id) {
     for (int i = 1; i < n; i++) {
         levels[me] = i;
         victims[i] = me;
-        while(n > 1  /* there exists other threads */
-        && find_threads_at_gte_level(thread_id)  /*  there are threads with higher levels */
+        while(find_threads_at_gte_level(thread_id)  /*  there are threads with higher levels */
         && victims[i] == me) { /* spin */ }
     }
   }
