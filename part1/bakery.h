@@ -12,17 +12,17 @@ public:
     }
 
     void init (int num_threads) {
-        n = num_threads;
+        n.store(num_threads);
         for (int i = 0; i < num_threads; i++) {
-            flags[i] = false;
-            tickets[i] = 0;
+            flags[i].store(false);
+            tickets[i].store(0);
         }
     }
 
     int get_next_ticket(){
         int highest = 0;
         for (int i = 0; i < n; i++){
-            if (tickets[i] > highest) { highest = tickets[i]; }
+            if (tickets[i].load() > highest) { highest = tickets[i].load(); }
         }
         return highest + 1;
     }
@@ -35,8 +35,8 @@ public:
     bool find_higher_priority_thread(int thread_id) {
         for (int i = 0; i < n; i++) {
             if (i == thread_id) { continue; }
-            if (flags[i]  /* other thread wants to acquire */
-            && lexicographic_lt(tickets[i], i, tickets[thread_id], thread_id)) { /* other thread comes first in line */
+            if (flags[i].load()  /* other thread wants to acquire */
+            && lexicographic_lt(tickets[i].load(), i, tickets[thread_id].load(), thread_id)) { /* other thread comes first in line */
                 return true;
             }
         }
@@ -45,17 +45,17 @@ public:
 
     void lock(int thread_id) {
         int i = thread_id;
-        flags[i] = true;
-        tickets[i] = get_next_ticket();
+        flags[i].store(true);
+        tickets[i].store(get_next_ticket());
         while(find_higher_priority_thread(thread_id)) { std::this_thread::yield(); }
     }
 
     void unlock(int thread_id) {
-        flags[thread_id] = false;
+        flags[thread_id].store(false);
     }
 
 private:
-    int n;
-    bool flags[MAX_THREADS];  // indexed by the thread id, whose element is their level
-    int tickets[MAX_THREADS];
+    atomic_int n;
+    atomic_bool flags[MAX_THREADS];  // indexed by the thread id, whose element is their level
+    atomic_int tickets[MAX_THREADS];
 };
