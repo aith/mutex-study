@@ -4,7 +4,7 @@
 #include "stdio.h"
 using namespace std;
 
-#define MAX_THREADS 50
+#define MAX_THREADS 128
 
 class mutex {
  public:
@@ -33,7 +33,7 @@ bool find_threads_at_gte_level(int thread_id) {
         levels[me] = i;
         victims[i] = me;
         while(find_threads_at_gte_level(thread_id)  /*  there are threads with higher levels */
-        && victims[i] == me) { /* spin */ }
+        && victims[i] == me) { std::this_thread::yield(); }
     }
   }
 

@@ -3,7 +3,7 @@
 #include <atomic>
 using namespace std;
 
-#define MAX_THREADS 200
+#define MAX_THREADS 128
 
 class mutex {
 public:
@@ -47,7 +47,7 @@ public:
         int i = thread_id;
         flags[i] = true;
         tickets[i] = get_next_ticket();
-        while(find_higher_priority_thread(thread_id)) {}
+        while(find_higher_priority_thread(thread_id)) { std::this_thread::yield(); }
     }
 
     void unlock(int thread_id) {
