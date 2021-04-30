@@ -64,8 +64,9 @@ public:
         while (current->next != NULL) {
             current = current->next;
         }
+        int d = current->data;
         lock.unlock();
-        return current->data;
+        return d;
     }
 
     void push(int p) {
@@ -82,7 +83,6 @@ public:
             current = current->next;
         }
         current->next = new Llist_node(p);
-
         lock.unlock();
     }
 
